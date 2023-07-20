@@ -1,0 +1,15 @@
+input stripeOneTimePaymentInput {
+  price: Float!
+}
+
+type stripeOneTimePaymentPayload {
+  start: String
+  url: String
+  stripeJson: String
+}
+
+type Mutation {
+  stripeOneTimePayment(
+    input: stripeOneTimePaymentInput!
+  ): stripeOneTimePaymentPayload
+}
