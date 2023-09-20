@@ -14,7 +14,7 @@ var _context = null;
 function myStartupStripe(context) {
   _context = context;
   const { app, collections, rootUrl } = context;
-
+  const { Products, Quotes, Vehicles } = collections;
   if (app.expressApp) {
     // enable files upload
 
@@ -24,8 +24,46 @@ function myStartupStripe(context) {
     app.expressApp.use(bodyParser.urlencoded({ extended: true }));
     app.expressApp.use(morgan("dev"));
     app.expressApp.post("/stripe", async (req, res) => {
-      console.log("In stripe req.body", req.body);
+      // console.log("In stripe req.body", req.body);
       console.log("stripe event type is ", req.body.type);
+      if (req.body.type === "checkout.session.completed") {
+        console.log("in check ", req.body);
+        console.log(
+          "paymentIntent Id is ",
+          req?.body?.data?.object?.payment_intent
+        );
+        //find checkout session
+        let cId = req?.body?.data?.object?.id;
+        let pId = req?.body?.data?.object?.payment_intent;
+        console.log("checkout id is ", cId);
+        if (cId) {
+          console.log("hello ");
+          let quote = await Quotes.findOne({
+            checkoutSessionId: cId,
+          });
+
+          if (quote) {
+            let obj = {
+              paymentStatus: true,
+              paymentIntentId: pId,
+            };
+
+            let updatedQuote = await Quotes.findOneAndUpdate(
+              { checkoutSessionId: cId },
+              { $set: obj },
+              { new: true }
+            );
+
+            console.log("updated Quote ", updatedQuote);
+
+            let paymentStatusUpdated =
+              updatedQuote?.lastErrorObject.updatedExisting;
+            if (paymentStatusUpdated) {
+              console.log("Quote payment status is changed to true");
+            }
+          }
+        }
+      }
 
       res.status(200).send({
         success: true,
