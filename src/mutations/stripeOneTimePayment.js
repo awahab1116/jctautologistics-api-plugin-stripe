@@ -26,7 +26,9 @@ export default async function stripeOneTimePayment(context, input) {
     );
   }
 
-  let decodedQuoteid = decodeProductOpaqueId(quoteId);
+  let qId = quoteId + "==";
+
+  let decodedQuoteid = decodeProductOpaqueId(qId);
   console.log("Decoded quoteId is ", decodedQuoteid);
 
   let findQuote = await Quotes.findOne({
@@ -50,7 +52,7 @@ export default async function stripeOneTimePayment(context, input) {
       payment_intent_data: {
         capture_method: "automatic",
         metadata: {
-          quoteId,
+          decodedQuoteid,
           data: "hello",
         },
       },
