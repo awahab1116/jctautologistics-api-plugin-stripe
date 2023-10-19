@@ -1,5 +1,4 @@
 input stripeOneTimePaymentInput {
-  price: Float!
   quoteId: String
 }
 

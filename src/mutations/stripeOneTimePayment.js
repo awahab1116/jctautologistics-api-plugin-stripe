@@ -11,19 +11,15 @@ export default async function stripeOneTimePayment(context, input) {
   const { Product } = simpleSchemas;
   const { Products, Quotes, Vehicles } = collections;
   //const { product: productInput, shopId, shouldCreateFirstVariant = true } = input;
-  const { price, quoteId } = input;
+  const { quoteId } = input;
 
   console.log("process env is ", process.env.STRIPE_SUCCESS_URL);
-  console.log("in inner function stripe ", price);
   console.log("process env is ", process.env.STRIPE_API_KEY);
   //console.log("condition ", !price || !quoteId.length);
 
-  if (!(price && quoteId)) {
+  if (!quoteId) {
     console.log("here in this");
-    throw new ReactionError(
-      "invalid-parameter",
-      "Please provide both price and quoteId"
-    );
+    throw new ReactionError("invalid-parameter", "Please provide quoteId");
   }
 
   let qId = quoteId + "==";
@@ -35,7 +31,7 @@ export default async function stripeOneTimePayment(context, input) {
     _id: decodedQuoteid,
   });
   console.log("Found Quote is ", findQuote);
-  if (findQuote) {
+  if (findQuote && findQuote?.discountedPrice) {
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
@@ -44,7 +40,7 @@ export default async function stripeOneTimePayment(context, input) {
             product_data: {
               name: "Stripe payment",
             },
-            unit_amount: price * 100,
+            unit_amount: findQuote?.discountedPrice * 100,
           },
           quantity: 1,
         },

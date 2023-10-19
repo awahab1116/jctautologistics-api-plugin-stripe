@@ -44,8 +44,9 @@ function myStartupStripe(context) {
 
           if (quote) {
             let obj = {
-              paymentStatus: true,
+              stripePaymentStatus: true,
               paymentIntentId: pId,
+              isDiscount: true,
             };
 
             let updatedQuote = await Quotes.findOneAndUpdate(
