@@ -30,7 +30,11 @@ export default async function stripeOneTimePayment(context, input) {
   let findQuote = await Quotes.findOne({
     _id: decodedQuoteid,
   });
+  console.log("typeof ", typeof findQuote?.discountedPrice);
   console.log("Found Quote is ", findQuote);
+  console.log("price data is ", findQuote?.discountedPrice * 100);
+  const unitAmountInCents = Math.round(unitAmount * 100);
+
   if (findQuote && findQuote?.discountedPrice) {
     const session = await stripe.checkout.sessions.create({
       line_items: [
